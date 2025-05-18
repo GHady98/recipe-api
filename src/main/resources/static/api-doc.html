@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🍽️ Recipe API - Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        h1, h2 { color: #2c3e50; }
+        code { background: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+<h1>🍽️ Recipe API - REST Documentation</h1>
+
+<h2>📌 Base URL</h2>
+<p><code>http://localhost:8080/api</code></p>
+
+<h2>🔐 Authentication Endpoints</h2>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>POST</td><td>/auth/signup</td><td>Register a new user</td></tr>
+    <tr><td>POST</td><td>/auth/login</td><td>Login and receive JWT</td></tr>
+    <tr><td>GET</td><td>/auth/all-users</td><td>List all users (Admin only)</td></tr>
+</table>
+
+<h2>📦 Recipe Endpoints</h2>
+<table>
+    <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+    <tr><td>GET</td><td>/recipes</td><td>Get all recipes</td></tr>
+    <tr><td>GET</td><td>/recipes/{id}</td><td>Get recipe by ID</td></tr>
+    <tr><td>POST</td><td>/recipes</td><td>Create a new recipe</td></tr>
+    <tr><td>PUT</td><td>/recipes/{id}</td><td>Update an existing recipe</td></tr>
+    <tr><td>DELETE</td><td>/recipes/{id}</td><td>Delete a recipe</td></tr>
+    <tr><td>GET</td><td>/recipes/search</td><td>Search by title or category</td></tr>
+    <tr><td>GET</td><td>/recipes/paged?page=0&size=5</td><td>Paginated recipe list</td></tr>
+</table>
+
+<h2>🛡️ Headers</h2>
+<pre>
+Authorization: Bearer &lt;your_token_here&gt;
+Content-Type: application/json
+    </pre>
+
+<h2>🧾 Sample Recipe JSON</h2>
+<pre>
+{
+  "title": "Spaghetti",
+  "ingredients": ["pasta", "sauce"],
+  "instructions": "Boil pasta and add sauce.",
+  "cookingTime": 20,
+  "category": "Italian"
+}
+    </pre>
+
+<h2>✅ Response Example</h2>
+<pre>
+{
+  "id": 1,
+  "title": "Spaghetti",
+  ...
+}
+    </pre>
+
+<h2>🚦 Status Codes</h2>
+<table>
+    <tr><th>Status</th><th>Description</th></tr>
+    <tr><td>200</td><td>Success</td></tr>
+    <tr><td>201</td><td>Created</td></tr>
+    <tr><td>400</td><td>Bad Request</td></tr>
+    <tr><td>401</td><td>Unauthorized</td></tr>
+    <tr><td>404</td><td>Not Found</td></tr>
+</table>
+</body>
+</html>
