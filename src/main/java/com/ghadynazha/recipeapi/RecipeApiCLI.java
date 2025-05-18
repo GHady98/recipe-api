@@ -23,20 +23,12 @@ public class    RecipeApiCLI  implements CommandLineRunner {
     private String token = null;
     private String role = null;
 
-    /**
-     * Constructs the CLI interface with a RestTemplate to interact with the Recipe API.
-     *
-     * @param restTemplate RestTemplate instance for making HTTP requests
-     */
     public RecipeApiCLI(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Override
     public void run(String... args) {
-        String profile = System.getProperty("spring.profiles.active");
-        if ("test".equalsIgnoreCase(profile)) return;
-
         Scanner scanner = new Scanner(System.in);
         int choice;
 
@@ -89,7 +81,6 @@ public class    RecipeApiCLI  implements CommandLineRunner {
         System.out.println("║   ❌ DELETE  /api/recipes/{id}    → Delete recipe    ║");
         System.out.println("╚══════════════════════════════════════════════════════╝");
     }
-
     private void signup(Scanner scanner) {
         System.out.print("Enter new username: ");
         String username = scanner.nextLine();
