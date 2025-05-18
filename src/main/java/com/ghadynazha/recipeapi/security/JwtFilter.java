@@ -19,31 +19,16 @@ import java.util.List;
  * Custom JWT filter that authenticates incoming requests by verifying the JWT token in the Authorization header.
  * Skips filtering for public endpoints like signup, login, Swagger, and public recipe APIs.
  *
- * This filter sets the user authentication in the Spring Security context if the token is valid.
- *
  * Author: Ghady Nazha
  */
 @Component
 public class JwtFilter extends OncePerRequestFilter{
-
-
     private final JwtUtil jwtUtil;
 
-    /**
-     * Constructor to inject JwtUtil.
-     *
-     * @param jwtUtil utility class for generating and validating JWT tokens
-     */
     public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
     }
 
-    /**
-     * Defines which request paths should skip this filter (public endpoints).
-     *
-     * @param request the incoming HTTP request
-     * @return true if the filter should be skipped, false otherwise
-     */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
@@ -51,19 +36,9 @@ public class JwtFilter extends OncePerRequestFilter{
                 || path.equals("/api/auth/login")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")
-                || path.startsWith("/api/recipes"); // Public recipe endpoints
+                || path.startsWith("/api/recipes"); // Allow public recipe access
     }
 
-    /**
-     * Processes the incoming request and validates the JWT token.
-     * If valid, extracts the username and role and sets the authentication context.
-     *
-     * @param request the incoming HTTP request
-     * @param response the outgoing HTTP response
-     * @param filterChain the filter chain to continue processing
-     * @throws ServletException if the filter encounters a problem
-     * @throws IOException if an I/O error occurs during processing
-     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -77,19 +52,19 @@ public class JwtFilter extends OncePerRequestFilter{
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 if (jwtUtil.isTokenValid(token)) {
-                    // ✅ Extract role from token
-                    Claims claims = Jwts.parserBuilder().setSigningKey(jwtUtil.getKey()).build()
+                    Claims claims = Jwts.parserBuilder()
+                            .setSigningKey(jwtUtil.getKey())
+                            .build()
                             .parseClaimsJws(token)
                             .getBody();
 
                     String role = claims.get("role", String.class);
 
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    username,
-                                    null,
-                                    List.of(new SimpleGrantedAuthority(role)) // ✅ apply role
-                            );
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            username,
+                            null,
+                            List.of(new SimpleGrantedAuthority(role))
+                    );
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
@@ -100,3 +75,5 @@ public class JwtFilter extends OncePerRequestFilter{
         filterChain.doFilter(request, response);
     }
 }
+
+
