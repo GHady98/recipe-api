@@ -9,15 +9,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Spring Security configuration class for setting up authorization rules
- * and integrating the custom JWT authentication filter.
+ * Spring Security configuration.
  *
- * Defines which endpoints are public, which require authentication,
- * and restricts admin-only access for certain routes.
+ * – Permits public access to signup/login, Swagger UI, OpenAPI docs, the root “/”
+ *   landing page, and all recipe‐read endpoints.
+ * – Restricts `/api/auth/all-users` to ADMINs.
+ * – All other endpoints require a valid JWT.
  *
  * Author: Ghady Nazha
  */
-@Profile("!test") // ✅ skip security if in test profile
+@Profile("!test")          // Skip this config when the “test” profile is active
 @Configuration
 @EnableWebSecurity
 
@@ -26,36 +27,37 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    /**
-     * Constructs the security configuration with the required JWT filter.
-     *
-     * @param jwtFilter the custom filter used for JWT token validation
-     */
     public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
-    /**
-     * Defines the security filter chain used by Spring Security.
-     * Configures endpoint access rules, adds the JWT filter, and disables CSRF protection.
-     *
-     * @param http the HttpSecurity object for configuring security rules
-     * @return the configured SecurityFilterChain
-     * @throws Exception in case of configuration errors
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+
+        return http
+                .csrf(csrf -> csrf.disable())                     // REST-style API → CSRF off
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/all-users").hasAuthority("ADMIN") // ✅ only admins can view all users
-                        .requestMatchers("/api/recipes/**").permitAll()
+                        // ── PUBLIC ENDPOINTS ────────────────────────────────
+                        .requestMatchers(
+                                "/",                                   // Home / health message
+                                "/swagger-ui/**",                      // Swagger UI
+                                "/v3/api-docs/**",                     // OpenAPI spec
+                                "/api/auth/signup",
+                                "/api/auth/login",
+                                "/api/recipes/**"                      // GET/search recipes
+                        ).permitAll()
+
+                        // ── ADMIN-ONLY ENDPOINTS ───────────────────────────
+                        .requestMatchers("/api/auth/all-users").hasAuthority("ADMIN")
+
+                        // ── EVERYTHING ELSE NEEDS AUTH ─────────────────────
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .csrf(csrf -> csrf.disable());
 
-        return http.build();
+                // Attach custom JWT filter before the username/password filter
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
+                .build();
     }
 }
-
